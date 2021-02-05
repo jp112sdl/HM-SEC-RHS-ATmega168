@@ -7,25 +7,24 @@
 // define this to read the device id, serial and device type from bootloader section
 // #define USE_OTA_BOOTLOADER
 #define SIMPLE_CC1101_INIT
+#define NORTC
+#define NOCRC
+#define SENSOR_ONLY
+#define NDEBUG
 
+#define EI_ATTINY24
 #define EI_NOTPORTA
 #define EI_NOTPORTB
-//#define EI_NOTPORTC
 #define EI_NOTEXTERNAL
 #include <EnableInterrupt.h>
 #include <LowPower.h>
-#include "AskSinPP.h"
+#include <AskSinPP.h>
+#include <Register.h>
+#include <Button.h>
+#include "MSP430State.h"
 
 using namespace as;
 
-#include "Sign.h"
-#include "MultiChannelDevice.h"
-#include "Channel.h"
-#include "ChannelList.h"
-#include "Message.h"
-#include "Register.h"
-#include "Button.h"
-#include "MSP430State.h"
 
 #define LED_PIN           8
 #define LED_PIN2          9
@@ -100,7 +99,6 @@ void setup () {
   sdev.initDone();
 
   contactISR(sdev.channel(1), A2);
-  hal.activity.stayAwake(millis2ticks(5000));
 }
 
 class PowerOffAlarm : public Alarm {
@@ -108,12 +106,12 @@ class PowerOffAlarm : public Alarm {
     bool    timerActive;
   public:
     PowerOffAlarm () : Alarm(0), timerActive(false) {}
-    ~PowerOffAlarm () {}
+    virtual ~PowerOffAlarm () {}
 
     void activateTimer(bool en) {
       if (en == true && timerActive == false) {
         sysclock.cancel(*this);
-        set(millis2ticks(500));
+        set(millis2ticks(5000));
         sysclock.add(*this);
       } else if (en == false) {
         sysclock.cancel(*this);
@@ -138,3 +136,7 @@ void loop() {
   bool poll = sdev.pollRadio();
   pwrOffAlarm.activateTimer( hal.activity.stayAwake() == false &&  worked == false && poll == false );
 }
+
+//saves ~646 bytes program size:
+//extern "C" void *malloc(size_t size) {return 0;}
+//extern "C" void free(void* p) {}

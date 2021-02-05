@@ -4,10 +4,10 @@
 // 2020-01-30 jp112sdl Creative Commons - http://creativecommons.org/licenses/by-nc-sa/3.0/de/
 //- -----------------------------------------------------------------------------------------------------------------------
 
-#ifndef __AMSPCONTACTSTATE_H__
-#define __AMSPCONTACTSTATE_H__
+#ifndef __MSP430CONTACTSTATE_H__
+#define __MSP430CONTACTSTATE_H__
 
-#include "MultiChannelDevice.h"
+#include <MultiChannelDevice.h>
 
 enum State { NoPos = 0, PosA, PosB, PosC };
 
@@ -17,7 +17,7 @@ enum State { NoPos = 0, PosA, PosB, PosC };
 namespace as {
 
 template <class HALTYPE, class List0Type, class List1Type, class List4Type, int PEERCOUNT>
-class MSPStateChannel : public Channel<HALTYPE, List1Type, List4Type, PEERCOUNT, List0Type> {
+class MSPStateChannel : public Channel<HALTYPE, List1Type, EmptyList, List4Type, PEERCOUNT, List0Type> {
 
     class EventSender : public Alarm {
       public:
@@ -60,7 +60,7 @@ class MSPStateChannel : public Channel<HALTYPE, List1Type, List4Type, PEERCOUNT,
   protected:
     CheckAlarm ca;
   public:
-    typedef Channel<HALTYPE, List1Type, List4Type, PEERCOUNT, List0Type> BaseChannel;
+    typedef Channel<HALTYPE, List1Type, EmptyList, List4Type, PEERCOUNT, List0Type> BaseChannel;
 
     MSPStateChannel () : BaseChannel(), sender(*this), canInterrupt(true), sabotage(false), sabstate(false), cycleEnabled(true), ca(*this) {}
     virtual ~MSPStateChannel () {}
@@ -177,7 +177,6 @@ class MSPStateChannel : public Channel<HALTYPE, List1Type, List4Type, PEERCOUNT,
 
 template<class HalType, class ChannelType, int ChannelCount, class List0Type>
 class StateDevice : public MultiChannelDevice<HalType, ChannelType, ChannelCount, List0Type> {
-
   public:
     typedef MultiChannelDevice<HalType, ChannelType, ChannelCount, List0Type> DevType;
     StateDevice(const DeviceInfo& info, uint16_t addr) : DevType(info, addr) {}
@@ -191,7 +190,7 @@ class StateDevice : public MultiChannelDevice<HalType, ChannelType, ChannelCount
 
 #define contactISR(chan,pin) class __##pin##ISRHandler { \
     public: \
-      static void isr () {hal.activity.stayAwake(millis2ticks(5000)); chan.irq(); } \
+      static void isr () { chan.irq(); } \
   }; \
   chan.init(); \
     enableInterrupt(pin,__##pin##ISRHandler::isr,RISING);
