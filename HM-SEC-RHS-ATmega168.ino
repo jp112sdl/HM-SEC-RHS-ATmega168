@@ -125,6 +125,48 @@ class PowerOffAlarm : public Alarm {
     }
 
     void powerOff() {
+      
+   /*
+      DDRC=B00001010;
+      PORTC |=  _BV(PC3) | _BV(PC1);
+      for (uint8_t i = 0; i < 10; i++) {
+        PORTC |= _BV(PC1);                //SET OUT    H
+        while (!(PINC & (1 << PC2)));     //WAIT WHILE L
+
+        PORTC &= ~_BV(PC1);               //SET OUT    L
+        while (PINC & (1 << PC2));        //WAIT WHILE H
+
+        if (i == 0) PORTC &= ~_BV(PC3); 
+
+        else if (i > 6)  PORTC |=  _BV(PC3);
+
+        if (i < 9) _delay_us(700);
+      }
+
+      PORTC &= ~_BV(PC3); 
+
+      _delay_ms(2000);
+  */    
+/*
+        DDRC=B00001010;                     //SET OUTPUT   (Data)
+      for (uint8_t i=0; i < 26; i++) {
+        PORTC |= _BV(PC1);                //SET OUT    H (Aout)
+
+        while (!(PINC & (1 << PC2)));     //WAIT WHILE L (Mout)
+        PORTC &= ~_BV(PC1);               //SET OUT    L (Aout)
+        if (i == 17) {
+            _delay_us(100);
+            PORTC &= ~_BV(PC3);           //SET OUT    L (Data)
+            DDRC=B00000010;               //SET INPUT    (Data)
+        }
+
+        while (PINC & (1 << PC2));        //WAIT WHILE H (Mout)
+        if (i == 15)  PORTC |=  _BV(PC3); //SET OUT    H (Data)
+        if (i < 25) _delay_us(700);
+      }
+      DDRC=B00000010;                     //SET INPUT    (Data)
+      
+     */ 
       hal.led.ledOff();
       hal.radio.setIdle();
       LowPower.powerDown(SLEEP_FOREVER, ADC_OFF, BOD_OFF);
